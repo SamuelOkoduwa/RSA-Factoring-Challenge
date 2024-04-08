@@ -1,0 +1,52 @@
+#!/usr/bin/python3
+
+import sys
+from math import isqrt
+
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
+
+def pollard_rho(n):
+    x = 2
+    y = 2
+    d = 1
+
+    while d == 1:
+        x = (x * x + 1) % n
+        y = (y * y + 1) % n
+        y = (y * y + 1) % n
+        d = gcd(abs(x - y), n)
+
+    if d == n:
+        return None
+
+    return d
+
+def factorize_rsa(num):
+    prime_factors = []
+    while True:
+        factor = pollard_rho(num)
+        if factor is None:
+            prime_factors.append(num)
+            break
+        prime_factors.append(factor)
+        num //= factor
+    return prime_factors
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: rsa <file>")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+    with open(input_file, 'r') as file:
+        for line in file:
+            num = int(line.strip())
+            factors = factorize_rsa(num)
+            p, q = factors[-2], factors[-1]  # Last two factors are p and q
+            print(f"{num}={p}*{q}")
+
+if __name__ == "__main__":
+    main()
